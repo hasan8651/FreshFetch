@@ -1,0 +1,61 @@
+import { NextResponse } from "next/server";
+import { getDb } from "@/lib/db";
+import { ObjectId } from "mongodb";
+
+export async function GET(req, { params }) {
+  try {
+    const { id } = params;
+    if (!ObjectId.isValid(id)) {
+      return NextResponse.json({ message: "Invalid product id" }, { status: 400 });
+    }
+
+    const db = await getDb();
+    const product = await db.collection("products").findOne({ _id: new ObjectId(id) });
+
+    if (!product) {
+      return NextResponse.json({ message: "Product not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(product);
+  } catch (error) {
+    return NextResponse.json({ message: "Failed to fetch product" }, { status: 500 });
+  }
+}
+
+export async function PATCH(req, { params }) {
+  try {
+    const { id } = params;
+    const body = await req.json();
+    const db = await getDb();
+
+    const result = await db.collection("products").updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { ...body, updatedAt: new Date() } }
+    );
+
+    if (result.matchedCount === 0) {
+      return NextResponse.json({ message: "Product Not Found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: "Product updated successfully", result });
+  } catch (error) {
+    return NextResponse.json({ message: "Failed to update product" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req, { params }) {
+  try {
+    const { id } = params;
+    const db = await getDb();
+
+    const result = await db.collection("products").deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 0) {
+      return NextResponse.json({ message: "Product Not Found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: "Product deleted successfully", result });
+  } catch (error) {
+    return NextResponse.json({ message: "Failed to delete product" }, { status: 500 });
+  }
+}
