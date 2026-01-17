@@ -1,17 +1,21 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { ObjectId } from "mongodb";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
 
-const session = await getServerSession(authOptions);
-
-if (!session || (session.user.role !== "admin" && session.user.role !== "manager")) {
-  return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-}
+export const dynamic = 'force-dynamic';
 
 export async function GET(req, { params }) {
   try {
-    const { id } = params;
+
+    const session = await getServerSession(authOptions);
+    if (!session || (session.user.role !== "admin" && session.user.role !== "manager")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    const { id } = await params;
     if (!ObjectId.isValid(id)) {
       return NextResponse.json({ message: "Invalid order ID" }, { status: 400 });
     }
@@ -23,13 +27,18 @@ export async function GET(req, { params }) {
 
     return NextResponse.json(order);
   } catch (error) {
-    return NextResponse.json({ message: "Failed to fetch order" }, { status: 500 });
+    return NextResponse.json({ message: "Failed to fetch order", error: error.message }, { status: 500 });
   }
 }
 
 export async function PATCH(req, { params }) {
   try {
-    const { id } = params;
+    const session = await getServerSession(authOptions);
+    if (!session || (session.user.role !== "admin" && session.user.role !== "manager")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    const { id } = await params;
     const body = await req.json();
     const db = await connectDB();
 
@@ -55,7 +64,12 @@ export async function PATCH(req, { params }) {
 
 export async function DELETE(req, { params }) {
   try {
-    const { id } = params;
+    const session = await getServerSession(authOptions);
+    if (!session || (session.user.role !== "admin" && session.user.role !== "manager")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    const { id } = await params;
     const db = await connectDB();
 
     const result = await db.collection("orders").deleteOne({ _id: new ObjectId(id) });
