@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDb } from "@/lib/db";
+import { connectDB } from "@/lib/db";
 import { ObjectId } from "mongodb";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -8,7 +8,7 @@ export async function PATCH(req, { params }) {
   try {
     const { id } = params;
     const body = await req.json();
-    const db = await getDb();
+    const db = await connectDB();
 
     if (body.password) {
       const bcrypt = require("bcryptjs");
@@ -39,7 +39,7 @@ export async function DELETE(req, { params }) {
     }
 
     const { id } = params;
-    const db = await getDb();
+    const db = await connectDB();
     const result = await db.collection("users").deleteOne({ _id: new ObjectId(id) });
 
     if (result.deletedCount === 0) {

@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  FaTimesCircle,
   FaRegFileAlt,
   FaSearch,
   FaEye,
@@ -11,22 +10,25 @@ import {
   FaHistory,
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
-import axiosInstance from "../../../utils/axiosInstance";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { AuthContext } from "../../../Provider/AuthContext";
+import axiosInstance from "@/lib/axiosInstance";
 
 const UserCancelledOrders = () => {
-  const { user } = useContext(AuthContext);
+  const { data: session, status } = useSession();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchCancelledOrders = async () => {
+
+      if (status !== "authenticated" || !session?.user?.email) return;
+
       setLoading(true);
       try {
-        const res = await axiosInstance.get(`/orders?email=${user?.email}`);
-        const cancelled = res.data.orders.filter(
+        const res = await axiosInstance.get(`/orders?email=${session.user.email}`);
+        const cancelled = (res.data.orders || []).filter(
           (order) => order.orderStatus === "cancelled"
         );
         setOrders(cancelled);
@@ -36,12 +38,22 @@ const UserCancelledOrders = () => {
         setLoading(false);
       }
     };
-    if (user?.email) fetchCancelledOrders();
-  }, [user?.email]);
+
+    fetchCancelledOrders();
+  }, [session?.user?.email, status]);
 
   const filteredOrders = orders.filter((order) =>
     order._id.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FCFBFC]">
+        <div className="w-12 h-12 border-4 border-gray-100 border-t-red-500 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -51,6 +63,7 @@ const UserCancelledOrders = () => {
     >
       <div className="max-w-6xl mx-auto space-y-10">
         
+  
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
@@ -78,6 +91,7 @@ const UserCancelledOrders = () => {
           </div>
         </header>
 
+      
         {loading ? (
           <div className="flex flex-col items-center justify-center py-32 space-y-4">
              <div className="w-12 h-12 border-4 border-gray-100 border-t-red-500 rounded-full animate-spin"></div>
@@ -124,16 +138,16 @@ const UserCancelledOrders = () => {
                   <div className="flex items-center justify-between w-full md:w-auto md:gap-16 py-6 md:py-0 border-y md:border-y-0 border-gray-50">
                     <div className="text-center">
                       <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Quantity</p>
-                      <p className="text-base font-black text-gray-800">{order.products.length} Items</p>
+                      <p className="text-base font-black text-gray-800">{order.products?.length || 0} Items</p>
                     </div>
                     <div className="text-center">
                       <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Lost Value</p>
-                      <p className="text-base font-black text-red-500 tracking-tighter">${order.total.toFixed(2)}</p>
+                      <p className="text-base font-black text-red-500 tracking-tighter">${order.total?.toFixed(2)}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-4 w-full md:w-auto">
-                       <div className={`flex-1 md:flex-none flex items-center gap-2 px-5 py-2.5 rounded-2xl text-[9px] font-black uppercase tracking-widest border ${
+                    <div className={`flex-1 md:flex-none flex items-center gap-2 px-5 py-2.5 rounded-2xl text-[9px] font-black uppercase tracking-widest border ${
                       order.paymentStatus === "paid"
                         ? "bg-amber-50 text-amber-600 border-amber-100"
                         : "bg-gray-50 text-gray-400 border-gray-100"

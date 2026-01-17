@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useEffect, useState, useContext } from "react";
-import axiosInstance from "../../../utils/axiosInstance";
+import React, { useEffect, useState } from "react";
 import { FiUser, FiShield, FiStar, FiSearch, FiFilter } from "react-icons/fi";
 import toast, { Toaster } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
-import { AuthContext } from "../../../Provider/AuthContext";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
+import axiosInstance from "@/lib/axiosInstance";
 
 const roles = ["all", "user", "manager", "admin"];
 
 const ManageUsers = () => {
-  const { user: currentUser } = useContext(AuthContext); 
+  const { data: session } = useSession();
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [page, setPage] = useState(1);
@@ -23,7 +23,7 @@ const ManageUsers = () => {
   const [roleFilter, setRoleFilter] = useState("all");
   const limit = 10;
 
-  const isRestrictedAdmin = currentUser?.email === "admin@FreshFetch.com";
+    const isRestrictedAdmin = session?.user?.email === "admin@freshfetch.com";
 
   const fetchUsers = async () => {
     try {
@@ -109,7 +109,6 @@ const ManageUsers = () => {
     <div className="space-y-8 pb-10">
       <Toaster position="top-right" />
 
-
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div>
           <h2 className="text-4xl font-black text-gray-900 tracking-tighter uppercase">
@@ -146,7 +145,6 @@ const ManageUsers = () => {
         </div>
       </div>
 
-
       <div className="bg-white rounded-[3rem] border border-gray-50 shadow-[0_20px_50px_rgba(0,0,0,0.02)] overflow-hidden relative">
         <AnimatePresence>
             {searchLoading && (
@@ -181,8 +179,10 @@ const ManageUsers = () => {
                         <div className="relative">
                             <Image
                               src={user.photoURL || `https://ui-avatars.com/api/?name=${user.fullName}&background=random`}
+                              width={48}
+                              height={48}
                               className="w-12 h-12 rounded-[1.2rem] object-cover ring-4 ring-gray-50 group-hover:ring-white transition-all shadow-sm"
-                              alt=""
+                              alt={user.fullName}
                             />
                             {user.role === 'admin' && <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white" />}
                         </div>
@@ -244,8 +244,7 @@ const ManageUsers = () => {
           </table>
         </div>
 
-   
-        <div className="px-10 py-8 bg-gray-50/50 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-100">
+             <div className="px-10 py-8 bg-gray-50/50 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-100">
           <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em]">
             Displaying Page <span className="text-indigo-600">{page}</span> of {totalPages}
           </p>
@@ -258,7 +257,6 @@ const ManageUsers = () => {
     </div>
   );
 };
-
 
 const RoleButton = ({ active, onClick, icon, disabled, color }) => (
     <button

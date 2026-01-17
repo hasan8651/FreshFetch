@@ -1,26 +1,30 @@
 "use client";
 
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { AuthContext } from "../../Provider/AuthContext";
-import axiosInstance from "../../utils/axiosInstance";
+import { useSession } from "next-auth/react";
 
-// আপনার রোল ভিত্তিক কম্পোনেন্টগুলো
+
+
 import AdminStats from "./Admin/AdminStats";
 import ManagerStats from "./Manager/ManagerStats";
 import UserStats from "./User/UserStats";
+import axiosInstance from "@/lib/axiosInstance";
 
 const DashboardHome = () => {
-  const { user: firebaseUser, loading: authLoading } = useContext(AuthContext);
+  const { data: session, status } = useSession();
   const [dbUser, setDbUser] = useState(null);
   const [fetching, setFetching] = useState(true);
 
   useEffect(() => {
     const getRoleBasedData = async () => {
-      if (!authLoading && firebaseUser?.email) {
+
+      if (status === "loading") return;
+
+      if (status === "authenticated" && session?.user?.email) {
         try {
           const response = await axiosInstance.get(
-            `/users?email=${firebaseUser.email}`
+            `/users?email=${session.user.email}`
           );
           if (response.data.result?.length > 0) {
             setDbUser(response.data.result[0]);
@@ -30,15 +34,15 @@ const DashboardHome = () => {
         } finally {
           setFetching(false);
         }
-      } else if (!authLoading && !firebaseUser) {
+      } else {
         setFetching(false);
       }
     };
+    
     getRoleBasedData();
-  }, [firebaseUser, authLoading]);
+  }, [session?.user?.email, status]);
 
-  // লোডিং স্টেট (একটি সুন্দর গ্রাডিয়েন্ট স্পিনারসহ)
-  if (authLoading || fetching) {
+  if (status === "loading" || fetching) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center">
         <div className="relative w-16 h-16">
@@ -55,7 +59,7 @@ const DashboardHome = () => {
   return (
     <div className="max-w-[1600px] mx-auto space-y-10">
       
-      {/* --- Welcome Header --- */}
+ 
       <motion.div 
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -63,7 +67,7 @@ const DashboardHome = () => {
       >
         <div>
           <h1 className="text-3xl font-black text-gray-900 tracking-tight">
-            Welcome back, <span className="text-green-600">{dbUser?.name || "Guest"}!</span>
+            Welcome back, <span className="text-green-600">{dbUser?.name || session?.user?.name || "Guest"}!</span>
           </h1>
           <p className="text-gray-400 text-sm font-bold mt-1 uppercase tracking-widest">
             Role: <span className="text-indigo-500">{dbUser?.role || "Visitor"}</span> • {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -78,8 +82,7 @@ const DashboardHome = () => {
         </div>
       </motion.div>
 
-      {/* --- Role Based Components --- */}
-      <motion.div
+         <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
@@ -88,12 +91,12 @@ const DashboardHome = () => {
         {dbUser?.role === "manager" && <ManagerStats dbUser={dbUser} />}
         {dbUser?.role === "user" && <UserStats dbUser={dbUser} />}
 
-        {!dbUser && (
+            {!dbUser && status === "authenticated" && (
           <div className="text-center py-24 bg-white rounded-[3rem] border border-dashed border-gray-200">
             <h2 className="text-2xl font-black text-gray-300 italic">
               User Data Not Synchronized
             </h2>
-            <p className="text-gray-400 text-sm mt-2">Please contact system administrator for access.</p>
+            <p className="text-gray-400 text-sm mt-2">Please contact system administrator for access permissions.</p>
           </div>
         )}
       </motion.div>

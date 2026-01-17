@@ -4,12 +4,11 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { CheckCircle, Package, ArrowRight, ShoppingBag } from "lucide-react";
-import confetti from "canvas-confetti"; // npm install canvas-confetti
+import confetti from "canvas-confetti";
 
 const OrderSuccessPage = () => {
   useEffect(() => {
-    // পেমেন্ট সাকসেস হলে কনফেটি (আতশবাজি) ইফেক্ট
-    const duration = 3 * 1000;
+     const duration = 3 * 1000;
     const end = Date.now() + duration;
 
     const frame = () => {
@@ -42,8 +41,7 @@ const OrderSuccessPage = () => {
         animate={{ opacity: 1, scale: 1 }}
         className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 md:p-12 text-center border border-gray-100"
       >
-        {/* Success Icon */}
-        <div className="mb-6 flex justify-center">
+         <div className="mb-6 flex justify-center">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -54,13 +52,12 @@ const OrderSuccessPage = () => {
           </motion.div>
         </div>
 
-        {/* Text Content */}
-        <h1 className="text-3xl font-black text-gray-900 mb-2">Order Confirmed!</h1>
+           <h1 className="text-3xl font-black text-gray-900 mb-2">Order Confirmed!</h1>
         <p className="text-gray-500 mb-8">
           Thank you for your purchase. Your organic farm-fresh products are being prepared for delivery.
         </p>
 
-        {/* Order Steps Status */}
+
         <div className="bg-gray-50 rounded-2xl p-6 mb-8 text-left space-y-4">
           <div className="flex items-center gap-4">
             <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center text-xs">1</div>
@@ -78,10 +75,10 @@ const OrderSuccessPage = () => {
           </div>
         </div>
 
-        {/* Buttons */}
+
         <div className="flex flex-col gap-3">
           <Link 
-            href="/all-grocerise"
+            href="/all-groceries"
             className="bg-green-600 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-green-700 transition-all shadow-lg shadow-green-100 active:scale-95"
           >
             <ShoppingBag size={18} />

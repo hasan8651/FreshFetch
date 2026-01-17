@@ -1,5 +1,6 @@
 import RoleRoute from "@/components/Privet/RoleRoute";
-import ManageUsers from "@/pages/Dashboard/Admin/ManageUser";
+import ManageUsers from "../ManageUser";
+
 
 export default function Page() {
   return (

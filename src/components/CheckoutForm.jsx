@@ -52,7 +52,10 @@ const CheckoutForm = ({ total, formData, cartItems }) => {
       if (confirmError) {
         toast.error(confirmError.message);
         setLoading(false);
-      } else if (paymentIntent.status === "succeeded") {
+        return;
+      }
+
+        if (paymentIntent.status === "succeeded") {
         const orderInfo = {
           email: formData.email,
           products: cartItems,
@@ -68,13 +71,16 @@ const CheckoutForm = ({ total, formData, cartItems }) => {
           body: JSON.stringify(orderInfo),
         });
 
-        if (orderResponse.status === 201) {
+        if (orderResponse.ok) {
           if (typeof window !== "undefined") {
             localStorage.removeItem("cart");
-             window.dispatchEvent(new Event("storage")); 
+            window.dispatchEvent(new Event("storage")); 
+            window.dispatchEvent(new Event("cart-updated"));
           }
           toast.success("Payment Successful!");
           router.push("/order-success");
+        } else {
+          throw new Error("Payment succeeded but order saving failed.");
         }
       }
     } catch (err) {
@@ -93,9 +99,10 @@ const CheckoutForm = ({ total, formData, cartItems }) => {
               base: {
                 fontSize: "16px",
                 color: "#424770",
+                fontFamily: "Inter, sans-serif",
                 "::placeholder": { color: "#aab7c4" },
               },
-              invalid: { color: "#9e2146" },
+              invalid: { color: "#ef4444" },
             },
           }}
         />
@@ -105,8 +112,10 @@ const CheckoutForm = ({ total, formData, cartItems }) => {
         type="button"
         onClick={handlePayment}
         disabled={!stripe || loading}
-        className={`w-full py-4 rounded-xl font-black text-white transition shadow-lg ${
-          loading ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700 cursor-pointer"
+        className={`w-full py-4 rounded-xl font-black text-white transition-all shadow-lg active:scale-[0.98] ${
+          loading 
+            ? "bg-gray-400 cursor-not-allowed" 
+            : "bg-indigo-600 hover:bg-indigo-700 cursor-pointer shadow-indigo-100"
         }`}
       >
         {loading ? "Processing..." : `Pay $${total.toFixed(2)} Now`}

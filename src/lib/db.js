@@ -1,8 +1,7 @@
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+import { MongoClient, ServerApiVersion, ObjectId } from "mongodb";
 
 let db;
 
-// MongoDB client
 const client = new MongoClient(process.env.MONGODB_URI, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -11,15 +10,18 @@ const client = new MongoClient(process.env.MONGODB_URI, {
   },
 });
 
-// connectDB function
-const connectDB = async () => {
-  if (!db) {
+export const connectDB = async () => {
+  if (db) return db;
+
+  try {
     await client.connect();
-    db = client.db("fresh-fetch");
-    console.log("✅ MongoDB connected");
+    db = client.db("FreshFetch");
+    console.log("✅ MongoDB connected successfully");
+    return db;
+  } catch (error) {
+    console.error("❌ MongoDB Connection Error:", error);
+    throw error;
   }
-  return db;
 };
 
-// export
-module.exports = { connectDB, ObjectId };
+export { ObjectId };

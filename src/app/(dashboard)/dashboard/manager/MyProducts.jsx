@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import { FaEdit, FaTrashAlt, FaEye, FaPlus, FaSearch, FaBoxOpen } from "react-icons/fa";
 import Swal from "sweetalert2";
-import { AuthContext } from "../../../Provider/AuthContext";
-import axiosInstance from "../../../utils/axiosInstance";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
+import axiosInstance from "@/lib/axiosInstance";
 
 const MyProducts = () => {
-  const { user } = useContext(AuthContext);
+  const { data: session, status } = useSession();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -16,26 +16,22 @@ const MyProducts = () => {
   const [search, setSearch] = useState("");
 
   const fetchMyProducts = async () => {
-    if (!user?.email) return;
+
+    if (status !== "authenticated" || !session?.user?.email) return;
 
     setLoading(true);
     try {
- 
       const params = {
         page: currentPage,
         limit: 10,
         search: search,
-        email: user.email
+        email: session.user.email
       };
 
       const res = await axiosInstance.get("/products", { params });
 
-      if (res.data.products) {
-
-        const myData = res.data.products.filter(
-          (item) => item.addedBy?.email === user.email
-        );
-        setProducts(myData);
+      if (res.data.result) {
+           setProducts(res.data.result); 
         setTotalPages(res.data.totalPages || 1);
       }
     } catch (error) {
@@ -46,8 +42,10 @@ const MyProducts = () => {
   };
 
   useEffect(() => {
-    fetchMyProducts();
-  }, [currentPage, search, user?.email]);
+    if (status === "authenticated") {
+      fetchMyProducts();
+    }
+  }, [currentPage, search, session?.user?.email, status]);
 
   const handleDelete = async (id) => {
     Swal.fire({
@@ -66,8 +64,8 @@ const MyProducts = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const res = await axiosInstance.delete(`/products/${id}`);
-          if (res.data.result.deletedCount > 0) {
+              const res = await axiosInstance.delete(`/products/${id}`);
+          if (res.data.deletedCount > 0) {
             Swal.fire("Deleted!", "Your product has been deleted.", "success");
             fetchMyProducts();
           }
@@ -78,18 +76,24 @@ const MyProducts = () => {
     });
   };
 
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F8F9FD]">
+        <div className="w-10 h-10 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 md:p-10 bg-[#F8F9FD] min-h-screen">
       <div className="max-w-7xl mx-auto space-y-8">
-        
-
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div>
             <h2 className="text-4xl font-black text-gray-900 tracking-tighter uppercase">
               Inventory <span className="text-indigo-600">Stock</span>
             </h2>
             <p className="text-gray-400 text-[10px] font-black mt-1 uppercase tracking-[0.2em]">
-              Managing: {user?.email}
+              Managing: {session?.user?.email}
             </p>
           </div>
           <Link
@@ -100,7 +104,7 @@ const MyProducts = () => {
           </Link>
         </header>
 
-  
+ 
         <div className="bg-white p-4 rounded-[2rem] shadow-sm border border-gray-100">
           <div className="relative group">
             <FaSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-indigo-500 transition-colors" />
@@ -117,7 +121,7 @@ const MyProducts = () => {
           </div>
         </div>
 
-
+  
         <div className="bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.02)] border border-gray-100 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full">
@@ -198,7 +202,7 @@ const MyProducts = () => {
           </div>
         </div>
 
-
+  
         <div className="flex flex-col sm:flex-row justify-between items-center gap-6 pb-10">
           <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
             Catalog Overview: {products.length} Products Found

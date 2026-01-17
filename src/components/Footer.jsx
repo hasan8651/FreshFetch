@@ -69,7 +69,7 @@ const Footer = () => {
             <ul className="space-y-4">
               {[
                 { name: "Home", href: "/" },
-                { name: "Shop Grid", href: "/all-grocerise" },
+                { name: "Shop Grid", href: "/all-groceries" },
                 { name: "About Us", href: "/about" },
                 { name: "Contact Us", href: "/contact" },
                 { name: "Our Blog", href: "/blog" },
@@ -101,7 +101,7 @@ const Footer = () => {
               ].map((cat) => (
                 <li key={cat}>
                   <Link
-                    href={`/all-grocerise?category=${cat}`}
+                    href={`/all-groceries?category=${cat}`}
                     className="text-gray-500 hover:text-indigo-600 text-sm transition-colors flex items-center gap-2 group"
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-gray-300 group-hover:bg-indigo-500 transition-all"></span>

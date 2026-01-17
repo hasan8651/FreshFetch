@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
-import { getDb } from "@/lib/db";
+import { connectDB } from "@/lib/db";
+
 
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
-    const db = await getDb();
+    const db = await connectDB();
+     if (!db) {
+      throw new Error("Could not connect to database");
+    }
     const productCollection = db.collection("products");
 
     const query = {};
@@ -34,7 +38,11 @@ export async function GET(req) {
     const sortBy = searchParams.get("sortBy");
     const order = searchParams.get("order") === "desc" ? -1 : 1;
     let sort = {};
-    if (sortBy) sort[sortBy] = order;
+    if (sortBy) {
+      sort[sortBy] = order;
+    } else {
+      sort = { createdAt: -1 };
+    }
 
     const totalProducts = await productCollection.countDocuments(query);
     const products = await productCollection
@@ -50,14 +58,18 @@ export async function GET(req) {
       products,
     });
   } catch (error) {
-    return NextResponse.json({ message: "Failed to fetch products", error: error.message }, { status: 500 });
+    console.error("Database Error:", error);
+    return NextResponse.json({ 
+      message: "Failed to fetch products", 
+      error: error.message 
+    }, { status: 500 });
   }
 }
 
 export async function POST(req) {
   try {
     const body = await req.json();
-    const db = await getDb();
+    const db = await connectDB();
     
     const product = {
       ...body,

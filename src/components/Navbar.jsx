@@ -66,7 +66,7 @@ const Navbar = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchTerm.trim()) {
-      router.push(`/all-grocerise?search=${searchTerm}`);
+      router.push(`/all-groceries?search=${searchTerm}`);
       setSearchTerm("");
       setIsMenuOpen(false);
     }
@@ -74,16 +74,16 @@ const Navbar = () => {
 
   const navLinks = [
     { name: "Home", path: "/", dropdown: null },
-    { name: "All Groceries", path: "/all-grocerise", dropdown: null },
+    { name: "All Groceries", path: "/all-groceries", dropdown: null },
     {
       name: "Category",
       path: null,
       dropdown: [
-        { name: "All Groceries", path: "/all-grocerise" },
-        { name: "Vegetables", path: "/all-grocerise?category=Vegetables" },
-        { name: "Fruits", path: "/all-grocerise?category=Fruits" },
-        { name: "Dairy", path: "/all-grocerise?category=Dairy" },
-        { name: "Beverages", path: "/all-grocerise?category=Beverages" },
+        { name: "All Groceries", path: "/all-groceries" },
+        { name: "Vegetables", path: "/all-groceries?category=Vegetables" },
+        { name: "Fruits", path: "/all-groceries?category=Fruits" },
+        { name: "Dairy", path: "/all-groceries?category=Dairy" },
+        { name: "Beverages", path: "/all-groceries?category=Beverages" },
       ],
     },
     { name: "About", path: "/about", dropdown: null },
@@ -142,7 +142,9 @@ const Navbar = () => {
                     <div onClick={() => setProfileDropdown(!profileDropdown)} className="w-10 h-10 rounded-full border-2 border-green-500 cursor-pointer overflow-hidden active:scale-95 transition-all">
                       <Image
                         src={user?.image || "https://i.ibb.co/vBR74KV/user.png"} 
-                        alt="Profile" unoptimized
+                        alt="Profile" 
+                        width={40}  
+  height={40}
                         className="w-full h-full object-cover" 
                       />
                     </div>

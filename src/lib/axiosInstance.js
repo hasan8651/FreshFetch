@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { getSession, signOut } from 'next-auth/react';
 
 const axiosInstance = axios.create({
-    baseURL: '/api', 
+    baseURL: process.env.NEXT_PUBLIC_API_URL || '/api', 
     timeout: 10000,
     headers: {
         'Content-Type': 'application/json',
@@ -11,14 +12,14 @@ const axiosInstance = axios.create({
 
 
 axiosInstance.interceptors.request.use(
-    (config) => {
-    
-        if (typeof window !== 'undefined') {
-            const token = localStorage.getItem('access-token');
-            if (token) {
-                config.headers.Authorization = `Bearer ${token}`;
-            }
+    async (config) => {
+
+        const session = await getSession();
+        
+        if (session?.accessToken) {
+            config.headers.Authorization = `Bearer ${session.accessToken}`;
         }
+        
         return config;
     },
     (error) => Promise.reject(error)
@@ -27,11 +28,17 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
     (response) => response,
-    (error) => {
-        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-            console.error('Unauthorized access, logging out...');
- 
+    async (error) => {
+        const status = error.response ? error.response.status : null;
+
+        if (status === 401 || status === 403) {
+            console.error('Unauthorized access - Logging out...');
+    
+            if (typeof window !== 'undefined') {
+                await signOut({ callbackUrl: '/login' });
+            }
         }
+        
         return Promise.reject(error);
     }
 );

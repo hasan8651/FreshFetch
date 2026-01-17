@@ -169,7 +169,7 @@ const ProductCard = ({ product }) => {
       <div className="relative h-32 md:h-60 w-full overflow-hidden rounded-xl md:rounded-2xl mb-3 md:mb-4 bg-gray-50">
         <Image
           src={product.thumbnail || product.singleImg}
-          alt={product.name}
+          alt={product.name} fill
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
         />
       </div>

@@ -131,7 +131,7 @@ const ServiceSection = () => {
                 ))}
               </div>
 
-              <Link href="/all-grocerise">
+              <Link href="/all-groceries">
                 <motion.button 
                   whileHover={{ scale: 1.05, boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1)" }}
                   whileTap={{ scale: 0.95 }}

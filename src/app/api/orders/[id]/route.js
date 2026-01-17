@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDb } from "@/lib/db";
+import { connectDB } from "@/lib/db";
 import { ObjectId } from "mongodb";
 
 
@@ -16,7 +16,7 @@ export async function GET(req, { params }) {
       return NextResponse.json({ message: "Invalid order ID" }, { status: 400 });
     }
 
-    const db = await getDb();
+    const db = await connectDB();
     const order = await db.collection("orders").findOne({ _id: new ObjectId(id) });
 
     if (!order) return NextResponse.json({ message: "Order not found" }, { status: 404 });
@@ -31,7 +31,7 @@ export async function PATCH(req, { params }) {
   try {
     const { id } = params;
     const body = await req.json();
-    const db = await getDb();
+    const db = await connectDB();
 
     const result = await db.collection("orders").updateOne(
       { _id: new ObjectId(id) },
@@ -56,7 +56,7 @@ export async function PATCH(req, { params }) {
 export async function DELETE(req, { params }) {
   try {
     const { id } = params;
-    const db = await getDb();
+    const db = await connectDB();
 
     const result = await db.collection("orders").deleteOne({ _id: new ObjectId(id) });
 

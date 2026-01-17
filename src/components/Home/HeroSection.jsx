@@ -38,7 +38,7 @@ const HeroSection = () => {
   }, []);
 
   const handleCategoryClick = (categorySlug) => {
-    router.push(`/all-grocerice?category=${categorySlug}`);
+    router.push(`/all-groceries?category=${categorySlug}`);
   };
 
   return (
@@ -83,7 +83,7 @@ const HeroSection = () => {
               className="absolute inset-0 w-full h-full object-cover"
             >
 
-              <source src="/videos/fresh-ness-hero.mp4" type="video/mp4" />
+              <source src="/fresh-ness-hero.mp4" type="video/mp4" />
             </video>
 
             <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-500"></div>
@@ -105,7 +105,7 @@ const HeroSection = () => {
                 <span className="text-lg line-through opacity-70">$80.00</span>
               </div>
               <button
-                onClick={() => router.push("/all-grocerice")}
+                onClick={() => router.push("/all-groceries")}
                 className="bg-indigo-700 text-white px-10 py-4 rounded-full font-bold hover:bg-white hover:text-indigo-800 transition-all duration-300 shadow-xl active:scale-95"
               >
                 Shop Now
@@ -128,7 +128,7 @@ const HeroSection = () => {
               <div className="relative z-10 p-8 text-white h-full flex flex-col justify-between">
                 <h3 className="text-2xl md:text-3xl font-extrabold leading-tight">Creamy Fruits baby Jem</h3>
                 <button
-                  onClick={() => router.push("/all-grocerice")}
+                  onClick={() => router.push("/all-groceries")}
                   className="bg-white text-indigo-900 w-fit px-6 py-2 rounded-full text-xs font-black hover:bg-amber-400 hover:text-white transition-colors"
                 >
                   SHOP NOW
@@ -149,7 +149,7 @@ const HeroSection = () => {
                   <div className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg">
                     <h4 className="font-black text-[10px] text-indigo-900 uppercase">SWEET DESERT</h4>
                   </div>
-                  <button onClick={() => router.push("/all-grocerice")} className="bg-white text-indigo-900 px-4 py-1.5 rounded-full text-[10px] font-bold">Buy Now</button>
+                  <button onClick={() => router.push("/all-groceries")} className="bg-white text-indigo-900 px-4 py-1.5 rounded-full text-[10px] font-bold">Buy Now</button>
                 </div>
               </motion.div>
 
@@ -166,7 +166,7 @@ const HeroSection = () => {
                   <div className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-center">
                     <h4 className="font-black text-[10px] text-gray-800 uppercase">DARK WASH</h4>
                   </div>
-                  <button onClick={() => router.push("/all-grocerice")} className="bg-indigo-800 text-white px-4 py-1.5 rounded-full text-[10px] font-bold">Shop All</button>
+                  <button onClick={() => router.push("/all-groceries")} className="bg-indigo-800 text-white px-4 py-1.5 rounded-full text-[10px] font-bold">Shop All</button>
                 </div>
               </motion.div>
             </div>

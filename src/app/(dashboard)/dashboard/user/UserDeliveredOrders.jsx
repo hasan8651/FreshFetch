@@ -1,23 +1,24 @@
 "use client";
 
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaCheckDouble, FaSearch, FaEye, FaAward } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
-import axiosInstance from "../../../utils/axiosInstance";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { AuthContext } from "../../../Provider/AuthContext";
+import axiosInstance from "@/lib/axiosInstance";
 
 const UserDeliveredOrders = () => {
-  const { user } = useContext(AuthContext);
+  const { data: session, status } = useSession();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
   const fetchDeliveredOrders = async () => {
+    if (status !== "authenticated" || !session?.user?.email) return;
+
     setLoading(true);
     try {
-
-      const res = await axiosInstance.get(`/orders?email=${user?.email}`);
+         const res = await axiosInstance.get(`/orders?email=${session.user.email}`);
       const allOrders = res.data.orders || []; 
       const delivered = allOrders.filter((order) => order.orderStatus === "delivered");
       
@@ -30,14 +31,20 @@ const UserDeliveredOrders = () => {
   };
 
   useEffect(() => {
-    if (user?.email) {
-      fetchDeliveredOrders();
-    }
-  }, [user?.email]);
+    fetchDeliveredOrders();
+  }, [session?.user?.email, status]);
 
   const filteredOrders = orders.filter(order => 
     order._id.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FBFBFE]">
+        <div className="w-12 h-12 border-4 border-gray-100 border-t-green-600 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <motion.div 
@@ -47,8 +54,7 @@ const UserDeliveredOrders = () => {
     >
       <div className="max-w-6xl mx-auto space-y-10">
         
-
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+         <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <div className="flex items-center gap-3 mb-2">
               <div className="p-3 bg-green-600 text-white rounded-2xl shadow-lg shadow-green-100">
@@ -75,8 +81,7 @@ const UserDeliveredOrders = () => {
           </div>
         </header>
 
-
-        {loading ? (
+          {loading ? (
           <div className="flex flex-col items-center justify-center py-32 space-y-4">
              <div className="w-12 h-12 border-4 border-gray-100 border-t-green-600 rounded-full animate-spin"></div>
              <p className="text-gray-300 font-black uppercase tracking-[0.3em] text-[10px]">Scanning Database...</p>

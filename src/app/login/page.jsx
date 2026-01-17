@@ -54,6 +54,23 @@ const LoginPage = () => {
     signIn("google", { callbackUrl: "/" });
   };
 
+
+  const handleDemoLogin = async (email, password) => {
+  setLoading(true);
+  const res = await signIn("credentials", {
+    email,
+    password,
+    redirect: false,
+  });
+  if (res?.ok) {
+    router.push("/");
+    router.refresh();
+  } else {
+    setError("Demo login failed");
+    setLoading(false);
+  }
+};
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#FDFDFD] px-4 py-12 relative overflow-hidden">
 
@@ -71,6 +88,21 @@ const LoginPage = () => {
           </h2>
           <p className="mt-3 text-sm text-gray-400 font-medium">Welcome back! Please enter your details.</p>
         </div>
+
+        <div className="flex gap-2 justify-center mt-4">
+  <button 
+    onClick={() => handleDemoLogin("user@freshfetch.com", "Abc123#")}
+    className="px-4 py-1.5 bg-green-50 text-green-700 rounded-lg text-[10px] font-bold hover:bg-green-100 transition-all"
+  >
+    Demo User
+  </button>
+  <button 
+    onClick={() => handleDemoLogin("admin@freshfetch.com", "Abc123#")}
+    className="px-4 py-1.5 bg-gray-50 text-gray-700 rounded-lg text-[10px] font-bold hover:bg-gray-100 transition-all"
+  >
+    Demo Admin
+  </button>
+</div>
 
         <form className="mt-8 space-y-5" onSubmit={handleLogin}>
           <div className="space-y-4">
@@ -143,7 +175,7 @@ const LoginPage = () => {
 
         <p className="text-center text-xs font-bold text-gray-400 mt-8">
           Don't have an account?{" "}
-          <Link href="/register" className="text-green-600 hover:text-green-700 underline underline-offset-4 ml-1">
+          <Link href="/registration" className="text-green-600 hover:text-green-700 underline underline-offset-4 ml-1">
             Create an account
           </Link>
         </p>

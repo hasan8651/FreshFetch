@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { getDb } from "@/lib/db";
+import { connectDB } from "@/lib/db";
 import bcrypt from "bcryptjs";
 
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
-    const db = await getDb();
+    const db = await connectDB();
     const userCollection = db.collection("users");
 
     let query = {};
@@ -38,7 +38,7 @@ export async function POST(req) {
     const body = await req.json();
     const { name, email, password, image } = body;
 
-    const db = await getDb();
+    const db = await connectDB();
     const userCollection = db.collection("users");
 
     const exist = await userCollection.findOne({ email });

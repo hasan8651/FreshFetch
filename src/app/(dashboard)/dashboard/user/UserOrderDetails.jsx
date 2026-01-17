@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   FaArrowLeft,
@@ -13,20 +13,35 @@ import {
   FaPrint,
 } from "react-icons/fa";
 import { motion } from "framer-motion";
-import axiosInstance from "../../../utils/axiosInstance";
-import { AuthContext } from "../../../Provider/AuthContext";
+import { useSession } from "next-auth/react";
+import axiosInstance from "@/lib/axiosInstance";
+import Image from "next/image";
+
 
 const UserOrderDetails = () => {
   const { id } = useParams();
   const router = useRouter();
-  const { user } = useContext(AuthContext);
+  const { data: session, status } = useSession();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchOrder = async () => {
+          if (status === "loading") return;
+      if (status === "unauthenticated") {
+        router.push("/login");
+        return;
+      }
+
       try {
+        setLoading(true);
         const res = await axiosInstance.get(`/orders/${id}`);
+           if (res.data.userEmail && res.data.userEmail !== session?.user?.email) {
+          console.error("Unauthorized access to this order.");
+          router.push("/dashboard/user/my-orders");
+          return;
+        }
+
         setOrder(res.data);
       } catch (error) {
         console.error("Error fetching order:", error);
@@ -34,16 +49,18 @@ const UserOrderDetails = () => {
         setLoading(false);
       }
     };
+
     if (id) fetchOrder();
     window.scrollTo(0, 0);
-  }, [id]);
+  }, [id, status, session?.user?.email, router]);
 
   const getStatusStep = (currentStatus) => {
     const steps = ["pending", "shipped", "delivered"];
-    return steps.indexOf(currentStatus?.toLowerCase()) ?? 0;
+    const index = steps.indexOf(currentStatus?.toLowerCase());
+    return index === -1 ? 0 : index;
   };
 
-  if (loading)
+  if (loading || status === "loading")
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4">
         <div className="w-12 h-12 border-4 border-green-100 border-t-green-600 rounded-full animate-spin"></div>
@@ -70,6 +87,7 @@ const UserOrderDetails = () => {
     >
       <div className="max-w-5xl mx-auto space-y-8">
         
+
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 print:hidden">
           <div>
             <button
@@ -101,6 +119,7 @@ const UserOrderDetails = () => {
           </div>
         </header>
 
+    
         {order.orderStatus !== "cancelled" && (
           <section className="bg-white p-10 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.02)] border border-gray-100 print:hidden">
             <div className="flex justify-between items-center relative max-w-3xl mx-auto">
@@ -108,7 +127,7 @@ const UserOrderDetails = () => {
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${(currentStep / 2) * 100}%` }}
-                className="absolute h-1 bg-green-500 top-1/2 -translate-y-1/2 z-0 rounded-full"
+                className="absolute h-1 bg-green-500 top-1/2 -translate-y-1/2 z-0 rounded-full transition-all duration-1000"
               />
 
               {[
@@ -133,21 +152,21 @@ const UserOrderDetails = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2 space-y-6">
             <div className="bg-white rounded-[3.5rem] shadow-sm border border-gray-100 overflow-hidden">
               <div className="p-8 md:p-10 border-b border-gray-50 bg-gray-50/30 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <FaReceipt className="text-green-600" />
                     <h3 className="font-black text-gray-800 uppercase text-[10px] tracking-widest">Your Items</h3>
                 </div>
-                <span className="text-[10px] font-black text-gray-400 uppercase">{order.products.length} Items</span>
+                <span className="text-[10px] font-black text-gray-400 uppercase">{order.products?.length || 0} Items</span>
               </div>
               
               <div className="divide-y divide-gray-50">
-                {order.products.map((item, index) => (
+                {order.products?.map((item, index) => (
                   <div key={index} className="p-8 md:p-10 flex items-center gap-8 group hover:bg-gray-50/50 transition-colors">
                     <div className="w-24 h-24 rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-inner shrink-0 group-hover:scale-105 transition-transform duration-500">
-                      <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                      <Image src={item.image} alt={item.name} unoptimized className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1">
                       <h4 className="font-black text-gray-900 text-xl tracking-tighter leading-none">{item.name}</h4>
@@ -156,7 +175,7 @@ const UserOrderDetails = () => {
                       </p>
                       <div className="mt-4 flex items-center justify-between">
                         <span className="text-gray-400 font-bold text-sm">
-                          ${item.price.toFixed(2)} <span className="text-green-600 font-black mx-2">×</span> {item.quantity}
+                          ${item.price?.toFixed(2)} <span className="text-green-600 font-black mx-2">×</span> {item.quantity}
                         </span>
                         <span className="text-gray-900 font-black text-xl tracking-tighter">
                           ${(item.price * item.quantity).toFixed(2)}
@@ -169,16 +188,16 @@ const UserOrderDetails = () => {
 
                <div className="p-10 bg-gray-900 text-white flex justify-between items-center rounded-b-[3.5rem]">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-green-400">Amount Paid</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-green-400">Total Amount Paid</p>
                   <p className="text-xs text-gray-400 font-medium mt-1">Inclusive of all taxes & shipping</p>
                 </div>
-                <p className="text-5xl font-black tracking-tighter">${order.total.toFixed(2)}</p>
+                <p className="text-5xl font-black tracking-tighter">${order.total?.toFixed(2)}</p>
               </div>
             </div>
           </div>
 
           <div className="space-y-6">
-
+       
             <div className="bg-white p-8 md:p-10 rounded-[3rem] shadow-sm border border-gray-100">
               <h3 className="font-black text-gray-800 uppercase text-[10px] tracking-widest mb-8 flex items-center gap-2 border-b border-gray-50 pb-5">
                 <FaMapMarkerAlt className="text-green-500" /> Delivery To
@@ -202,7 +221,7 @@ const UserOrderDetails = () => {
               </div>
             </div>
 
- 
+    
             <div className="bg-white p-8 md:p-10 rounded-[3rem] shadow-sm border border-gray-100">
               <h3 className="font-black text-gray-800 uppercase text-[10px] tracking-widest mb-8 flex items-center gap-2 border-b border-gray-50 pb-5">
                 <FaCreditCard className="text-indigo-500" /> Payment Info
@@ -226,7 +245,7 @@ const UserOrderDetails = () => {
                 {order.transactionId && (
                   <div className="mt-6 pt-6 border-t border-gray-50">
                     <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-3 text-center">Transaction ID</p>
-                    <p className="text-[9px] font-mono font-bold text-gray-500 break-all bg-gray-50 p-4 rounded-[1.5rem] border border-gray-100 text-center select-all">
+                    <p className="text-[9px] font-mono font-bold text-gray-500 break-all bg-gray-50 p-4 rounded-[1.5rem] border border-gray-100 text-center select-all cursor-pointer">
                       {order.transactionId}
                     </p>
                   </div>
@@ -237,7 +256,7 @@ const UserOrderDetails = () => {
 
         </div>
 
-
+  
         <div className="hidden print:block text-center pt-20 border-t border-gray-100">
            <p className="text-xl font-black text-green-600">FreshFetch Organic Store</p>
            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Thank you for shopping with us!</p>

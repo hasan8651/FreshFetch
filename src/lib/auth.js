@@ -1,6 +1,6 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-import { getDb } from "./db";
+import { connectDB } from "./db";
 import { compare } from "bcryptjs";
 
 export const authOptions = {
@@ -16,7 +16,7 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const db = await getDb();
+        const db = await connectDB();
         const user = await db
           .collection("users")
           .findOne({ email: credentials.email });

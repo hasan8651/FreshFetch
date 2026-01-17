@@ -10,6 +10,7 @@ import {
   IoPeopleOutline, IoSettingsOutline, IoLogOutOutline,
   IoMenuOutline, IoCloseOutline, IoNotificationsOutline 
 } from "react-icons/io5";
+import Image from "next/image";
 
 const DashboardLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -18,7 +19,7 @@ const DashboardLayout = ({ children }) => {
   const menuItems = [
     { name: "Overview", icon: <IoGridOutline />, path: "/dashboard" },
     { name: "Inventory", icon: <IoCubeOutline />, path: "/dashboard/inventory" },
-    { name: "Orders", icon: <IoCartOutline />, path: "/dashboard/orders" },
+    { name: "Orders", icon: <IoCartOutline />, path: "/dashboard/my-orders" },
     { name: "Customers", icon: <IoPeopleOutline />, path: "/dashboard/customers" },
     { name: "Settings", icon: <IoSettingsOutline />, path: "/dashboard/settings" },
   ];
@@ -89,7 +90,7 @@ const DashboardLayout = ({ children }) => {
               <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
             </button>
             <div className="w-10 h-10 rounded-xl bg-indigo-100 border-2 border-white shadow-sm overflow-hidden cursor-pointer hover:ring-2 ring-green-500 transition-all">
-               <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" />
+               <Image src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" unoptimized width={100} height={100} alt="User" />
             </div>
           </div>
         </header>

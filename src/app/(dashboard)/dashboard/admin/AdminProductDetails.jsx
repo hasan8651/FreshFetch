@@ -1,24 +1,25 @@
 "use client";
 
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { FaArrowLeft, FaEdit, FaChartLine, FaBoxOpen } from "react-icons/fa";
 import Link from "next/link";
-import axiosInstance from "../../../utils/axiosInstance";
-import { AuthContext } from "../../../Provider/AuthContext";
+import { useSession } from "next-auth/react";
 
-import ImageGallery from "../../../components/Admin-Manger/ImageGallery";
-import ProductInfo from "../../../components/Admin-Manger/ProductInfo";
-import PriceStockChart from "../../../components/Admin-Manger/PriceStockChart";
+import axiosInstance from "@/lib/axiosInstance";
+import ImageGallery from "@/components/product/ImageGallery";
+import PriceStockChart from "@/components/dashboard/PriceStockChart";
+import ProductInfo from "@/components/product/ProductInfo";
 
 const AdminProductDetails = () => {
   const { id } = useParams();
   const router = useRouter();
-  const { user } = useContext(AuthContext);
+  const { data: session } = useSession();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const isRestrictedAdmin = user?.email === "admin@FreshFetch.com";
+
+  const isRestrictedAdmin = session?.user?.email === "admin@freshfetch.com";
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -38,18 +39,26 @@ const AdminProductDetails = () => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-gray-50">
         <div className="w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
-        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Loading Master Data...</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 animate-pulse">
+          Loading Master Data...
+        </p>
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-        <FaBoxOpen size={50} className="text-gray-200 mb-4" />
-        <h2 className="text-xl font-black text-gray-400 uppercase">Product Not Found</h2>
-        <button onClick={() => router.back()} className="mt-4 text-indigo-600 font-bold flex items-center gap-2">
-          <FaArrowLeft /> Go Back
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-center px-4">
+        <FaBoxOpen size={60} className="text-gray-200 mb-4" />
+        <h2 className="text-xl font-black text-gray-500 uppercase tracking-tighter">
+          Product Not Found
+        </h2>
+        <p className="text-gray-400 text-sm mt-2">The product you are looking for does not exist or has been removed.</p>
+        <button 
+          onClick={() => router.back()} 
+          className="mt-6 flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-lg"
+        >
+          <FaArrowLeft /> Back to Inventory
         </button>
       </div>
     );
@@ -59,13 +68,12 @@ const AdminProductDetails = () => {
     <div className="p-4 md:p-10 bg-[#FBFBFE] min-h-screen">
       <div className="max-w-7xl mx-auto space-y-8">
         
-
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <button
             onClick={() => router.back()}
             className="group flex items-center gap-3 text-gray-400 hover:text-indigo-600 transition-all font-black text-[10px] uppercase tracking-widest"
           >
-            <div className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center group-hover:bg-indigo-50 group-hover:border-indigo-100">
+            <div className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center group-hover:bg-indigo-50 group-hover:border-indigo-100 transition-all">
                 <FaArrowLeft />
             </div>
             Back to Inventory
@@ -90,13 +98,14 @@ const AdminProductDetails = () => {
           </div>
         </div>
 
-   
+    
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           
-   
+  
           <div className="lg:col-span-4 space-y-8">
-            <div className="bg-white p-2 rounded-[2.5rem] shadow-sm border border-gray-50">
-                <ImageGallery mainImg={product.singleImg} allImgs={product.images} />
+            <div className="bg-white p-2 rounded-[2.5rem] shadow-sm border border-gray-50 overflow-hidden">
+   
+                <ImageGallery mainImg={product.singleImg || product.thumbnail} allImgs={product.images || []} />
             </div>
 
             <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-50 overflow-hidden">
@@ -107,7 +116,7 @@ const AdminProductDetails = () => {
                 <PriceStockChart
                     price={product.price}
                     stock={product.stock}
-                    variants={product.variants}
+                    variants={product.variants || []}
                 />
               </div>
             </div>
@@ -120,7 +129,6 @@ const AdminProductDetails = () => {
                 <ProductInfo product={product} />
             </div>
 
- 
             <div className="bg-white p-10 rounded-[3rem] shadow-sm border border-gray-50">
               <div className="flex items-center justify-between mb-6 border-b border-gray-50 pb-6">
                 <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.3em]">
@@ -132,21 +140,22 @@ const AdminProductDetails = () => {
               </div>
               <div className="prose prose-indigo max-w-none">
                  <p className="text-gray-600 leading-relaxed font-medium whitespace-pre-line">
-                   {product.description}
+                   {product.description || "No description available for this product."}
                  </p>
               </div>
             </div>
 
+  
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                     {label: "Category", val: product.category},
-                    {label: "Added By", val: product.addedBy?.name || "Admin"},
-                    {label: "Rating", val: `${product.rating} / 5`},
-                    {label: "Created", val: new Date(product.createdAt).toLocaleDateString()}
+                    {label: "Added By", val: product.addedBy?.name || "System Admin"},
+                    {label: "Rating", val: `${product.rating || 0} / 5`},
+                    {label: "Created", val: product.createdAt ? new Date(product.createdAt).toLocaleDateString() : 'N/A'}
                 ].map((item, i) => (
-                    <div key={i} className="bg-gray-50/50 p-5 rounded-3xl border border-gray-100/50">
+                    <div key={i} className="bg-white p-5 rounded-3xl border border-gray-50 shadow-sm hover:border-indigo-100 transition-colors">
                         <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">{item.label}</p>
-                        <p className="text-xs font-black text-gray-800 uppercase">{item.val}</p>
+                        <p className="text-xs font-black text-gray-800 uppercase truncate">{item.val}</p>
                     </div>
                 ))}
             </div>

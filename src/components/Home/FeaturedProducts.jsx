@@ -110,7 +110,7 @@ const FeaturedProducts = () => {
         )}
 
         <div className="mt-16 text-center">
-          <Link href="/all-grocerise">
+          <Link href="/all-groceries">
             <motion.button 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
