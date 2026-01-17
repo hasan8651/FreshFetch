@@ -6,10 +6,11 @@ import { useSession } from "next-auth/react";
 
 
 
-import AdminStats from "./Admin/AdminStats";
-import ManagerStats from "./Manager/ManagerStats";
-import UserStats from "./User/UserStats";
+
 import axiosInstance from "@/lib/axiosInstance";
+import AdminStats from "./admin/AdminStats";
+import ManagerStats from "./manager/ManagerStats";
+import UserStats from "./user/UserStats";
 
 const DashboardHome = () => {
   const { data: session, status } = useSession();

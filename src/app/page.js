@@ -2,12 +2,13 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import HeroSection from '../components/home/HeroSection';
-import FeaturedProducts from '../components/home/FeaturedProducts';
-import DiscountSection from '../components/home/DiscountSection';
-import RatingSection from '../components/home/RatingSection';
-import ServiceSection from '../components/home/ServiceSection';
-import FAQSection from '../components/home/FAQSection';
+import HeroSection from '@/components/Home/HeroSection';
+import ServiceSection from '@/components/Home/ServiceSection';
+import FeaturedProducts from '@/components/Home/FeaturedProducts';
+import RatingSection from '@/components/Home/RatingSection';
+import DiscountSection from '@/components/Home/DiscountSection';
+import FAQSection from '@/components/Home/FAQSection';
+
 
 const HomePage = () => {
   const fadeInVariant = {

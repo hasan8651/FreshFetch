@@ -1,4 +1,4 @@
-import RoleRoute from "@/components/Privet/RoleRoute";
+import RoleRoute from "@/components/Private/RoleRoute";
 import ManageUsers from "../ManageUser";
 
 
